@@ -9,6 +9,6 @@ import (
 func UsersRoutes(app *echo.Echo) {
 	// generates TOTP secret and TOTP url
 	app.GET("/users/:uuid/totp", controllers.GenerateTotp)
-	// activates otp
+	// activates totp
 	app.POST("/users/:uuid/totp", controllers.ActivateTotp)
 }

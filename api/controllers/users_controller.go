@@ -23,7 +23,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"success": false,
 				"message": "There was an unknown error",
 			},
 		)
@@ -34,7 +33,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error validating your data. Please retry",
 			},
 		)
@@ -44,7 +42,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error in data input. Fix them",
 			},
 		)
@@ -55,7 +52,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error with database",
 			},
 		)
@@ -66,7 +62,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"success": false,
 				"message": "User email already exists",
 			},
 		)
@@ -75,7 +70,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error with database",
 			},
 		)
@@ -86,7 +80,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error creating the user",
 			},
 		)
@@ -101,7 +94,6 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error creating the user",
 			},
 		)
@@ -110,7 +102,6 @@ func ActivateTotp(c echo.Context) error {
 	return c.JSON(
 		http.StatusCreated,
 		&echo.Map{
-			"success": true,
 			"data": &echo.Map{
 				"user": &echo.Map{
 					"user_uuid": &user.UserUuid,
@@ -129,7 +120,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"success": false,
 				"message": "There was an unknown error",
 			},
 		)
@@ -140,7 +130,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error validating your data. Please retry",
 			},
 		)
@@ -150,7 +139,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error in data input. Fix them",
 			},
 		)
@@ -161,7 +149,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error with database",
 			},
 		)
@@ -172,7 +159,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"success": false,
 				"message": "User email already exists",
 			},
 		)
@@ -181,7 +167,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error with database",
 			},
 		)
@@ -192,7 +177,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error creating the user",
 			},
 		)
@@ -208,7 +192,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"success": false,
 				"message": "There was an error creating the user",
 			},
 		)
@@ -217,7 +200,6 @@ func Signup(c echo.Context) error {
 	return c.JSON(
 		http.StatusCreated,
 		&echo.Map{
-			"success": true,
 			"data": &echo.Map{
 				"user": &echo.Map{
 					"user_uuid": &user.UserUuid,

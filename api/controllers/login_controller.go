@@ -2,16 +2,19 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"log"
 	"login_api/api/models"
 	"login_api/pkg/config"
+	jwt_verifier "login_api/pkg/jwt"
 	"login_api/pkg/password_validator"
+	"login_api/pkg/totp"
 	validation "login_api/pkg/validation"
 	"login_api/storage"
 	"net/http"
+	"strings"
 )
 
 func Login(c echo.Context) error {
@@ -78,22 +81,42 @@ func Login(c echo.Context) error {
 	}
 	if user.TotpActive {
 		// if user has totp then send token but with scope only for verifyOtp
+		jwtString, err := user.GenerateJWT(true)
+		if err != nil {
+			return c.JSON(
+				http.StatusBadGateway,
+				&echo.Map{
+					"message": "There was an error generating token for user",
+				},
+			)
+		}
+		log.Println(jwtString)
 		return c.JSON(
 			http.StatusOK,
 			&echo.Map{
 				"data": &echo.Map{
-					"mfa_token":    "token with only scope verifyOtp",
+					"mfa_token":    jwtString,
 					"mfa_required": true,
 				},
 			},
 		)
 	}
+	jwtString, err := user.GenerateJWT(false)
+	if err != nil {
+		return c.JSON(
+			http.StatusBadGateway,
+			&echo.Map{
+				"message": "There was an error generating token for user",
+			},
+		)
+	}
+	log.Println(jwtString)
 	// user logged in and totp not active
 	return c.JSON(
 		http.StatusOK,
 		&echo.Map{
 			"data": &echo.Map{
-				"access_token": "okkkkkkk",
+				"access_token": jwtString,
 				"mfa_required": false,
 			},
 		},
@@ -127,6 +150,34 @@ func VerifyTotp(c echo.Context) error {
 		return err
 	}
 	// connect db
+	_, err = storage.ConnectDB()
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&echo.Map{
+				"message": "There was an error with database",
+			},
+		)
+	}
+	// validate token
+	token, err := jwt_verifier.IsValidToken(c, "verify-totp")
+	if err != nil {
+		if strings.Contains(err.Error(), "is expired") {
+			return c.JSON(
+				http.StatusUnauthorized,
+				&echo.Map{
+					"message": "Token is expired or not active yet",
+				},
+			)
+		}
+		return c.JSON(
+			http.StatusUnauthorized,
+			&echo.Map{
+				"message": err.Error(),
+			},
+		)
+	}
+	// connect db
 	db, err := storage.ConnectDB()
 	if err != nil {
 		return c.JSON(
@@ -136,14 +187,50 @@ func VerifyTotp(c echo.Context) error {
 			},
 		)
 	}
-	fmt.Println(db)
-	// here check the totp of user owner of token with scope verifyTotp
-	// if success then return access_token with scope user
+	var sub = token.Claims.(jwt.MapClaims)["sub"]
+	var user = models.User{}
+	err = db.Where("user_uuid = ?", sub).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.JSON(
+			http.StatusUnauthorized,
+			&echo.Map{
+				"message": "User not exists",
+			},
+		)
+	}
+	if err != nil {
+		return c.JSON(
+			http.StatusBadGateway,
+			&echo.Map{
+				"message": "There was an error with database",
+			},
+		)
+	}
+	// validate the totp against token owner secret
+	if !totp.Verify(user.TotpSecret, data.Totp) {
+		return c.JSON(
+			http.StatusUnauthorized,
+			&echo.Map{
+				"message": "Invalid totp",
+			},
+		)
+	}
+	jwtString, err := user.GenerateJWT(false)
+	if err != nil {
+		return c.JSON(
+			http.StatusBadGateway,
+			&echo.Map{
+				"message": "There was an error generating token for user",
+			},
+		)
+	}
+	// user logged in and totp is active
 	return c.JSON(
 		http.StatusOK,
 		&echo.Map{
 			"data": &echo.Map{
-				"access_token": "okkkkkkk",
+				"access_token": jwtString,
+				"mfa_required": false,
 			},
 		},
 	)

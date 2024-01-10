@@ -2,6 +2,7 @@ package models
 
 import (
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
@@ -24,9 +25,9 @@ type User struct {
 }
 
 type TotpInfo struct {
-	uri    string
-	qr     string
-	secret string
+	Uri    string `json:"uri"`
+	Qr     string `json:"qr"`
+	Secret string `json:"secret"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
@@ -35,21 +36,22 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 // GenerateTotpInfo otpauth://totp/issuerName:email?secret=secretOfUser&issuer=NewsLogin
-func (u *User) GenerateTotpInfo() (*TotpInfo, error) {
+func (u *User) GenerateTotpInfo() (TotpInfo, error) {
 	uri := gotp.NewDefaultTOTP(
 		u.TotpSecret,
 	).ProvisioningUri(
 		u.Email,
 		"NewsLogin",
 	)
-	code, err := qrcode.New(uri, qrcode.Medium)
+	png, err := qrcode.Encode(uri, qrcode.Medium, 256)
 	if err != nil {
-		return nil, err
+		return TotpInfo{}, err
 	}
-	return &TotpInfo{
-		secret: u.TotpSecret,
-		uri:    uri,
-		qr:     code.Content,
+	qr := "data:image/png;base64," + base64.StdEncoding.EncodeToString([]byte(png))
+	return TotpInfo{
+		Secret: u.TotpSecret,
+		Uri:    uri,
+		Qr:     qr,
 	}, nil
 }
 

@@ -14,7 +14,7 @@ import (
 	validation "login_api/pkg/validation"
 	"login_api/storage"
 	"net/http"
-	"strings"
+	"strconv"
 )
 
 func Login(c echo.Context) error {
@@ -162,14 +162,6 @@ func VerifyTotp(c echo.Context) error {
 	// validate token
 	token, err := jwt_verifier.IsValidToken(c, "verify-totp")
 	if err != nil {
-		if strings.Contains(err.Error(), "is expired") {
-			return c.JSON(
-				http.StatusUnauthorized,
-				&echo.Map{
-					"message": "Token is expired or not active yet",
-				},
-			)
-		}
 		return c.JSON(
 			http.StatusUnauthorized,
 			&echo.Map{
@@ -206,8 +198,16 @@ func VerifyTotp(c echo.Context) error {
 			},
 		)
 	}
+	if !user.TotpActive {
+		return c.JSON(
+			http.StatusForbidden,
+			&echo.Map{
+				"message": "User Totp is not active",
+			},
+		)
+	}
 	// validate the totp against token owner secret
-	if !totp.Verify(user.TotpSecret, data.Totp) {
+	if !totp.Verify(user.TotpSecret, strconv.Itoa(data.Totp)) {
 		return c.JSON(
 			http.StatusUnauthorized,
 			&echo.Map{

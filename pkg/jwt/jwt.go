@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
@@ -23,7 +22,7 @@ func getTokenPayload(token string) (string, error) {
 	return tokens[1], nil
 }
 
-func getKey() (*rsa.PublicKey, error) {
+func getKey() (any, error) {
 	publicKeyPath := "./env/public_key.pem"
 	keyData, err := os.ReadFile(publicKeyPath)
 	if err != nil {
@@ -34,7 +33,7 @@ func getKey() (*rsa.PublicKey, error) {
 	if publicKeyBlock == nil {
 		return nil, errors.New("error decoding pem with keyData")
 	}
-	key, err := x509.ParsePKCS1PublicKey(publicKeyBlock.Bytes)
+	key, err := x509.ParsePKIXPublicKey(publicKeyBlock.Bytes)
 	if err != nil {
 		log.Println("error parsing key from key block bytes", err.Error())
 		return nil, errors.New("error_key")
@@ -56,6 +55,9 @@ func parseValidateAndGetToken(bToken string) (*jwt.Token, error) {
 		return key, nil
 	})
 	if err != nil {
+		if err.Error() == "crypto/rsa: verification error" {
+			return nil, errors.New("invalid token")
+		}
 		return nil, err
 	}
 	return token, nil

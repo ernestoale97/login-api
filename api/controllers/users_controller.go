@@ -3,11 +3,13 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"log"
 	"login_api/api/models"
 	"login_api/pkg/config"
+	jwt_verifier "login_api/pkg/jwt"
 	"login_api/pkg/password_validator"
 	"login_api/pkg/totp"
 	"login_api/pkg/validation"
@@ -15,6 +17,7 @@ import (
 	"net/http"
 )
 
+// ActivateTotp headers: token of user; params:
 func ActivateTotp(c echo.Context) error {
 	// load config
 	_, err := config.LoadConfig()
@@ -108,6 +111,84 @@ func ActivateTotp(c echo.Context) error {
 					"email":     &user.Email,
 				},
 			},
+		},
+	)
+}
+
+func GenerateTotp(c echo.Context) error {
+	// load config
+	_, err := config.LoadConfig()
+	if err != nil {
+		log.Println("Error loading config:", err.Error())
+		return c.JSON(
+			http.StatusInternalServerError,
+			&echo.Map{
+				"message": "There was an unknown error",
+			},
+		)
+	}
+	// validate token
+	token, err := jwt_verifier.IsValidToken(c, "user")
+	if err != nil {
+		return c.JSON(
+			http.StatusUnauthorized,
+			&echo.Map{
+				"message": err.Error(),
+			},
+		)
+	}
+	// connect db
+	db, err := storage.ConnectDB()
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&echo.Map{
+				"message": "There was an error with database",
+			},
+		)
+	}
+	var sub = token.Claims.(jwt.MapClaims)["sub"]
+	if sub != c.Param("uuid") {
+		return c.JSON(
+			http.StatusForbidden,
+			&echo.Map{
+				"message": "UUID not match with token",
+			},
+		)
+	}
+	var user = models.User{}
+	err = db.Where("user_uuid = ?", sub).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&echo.Map{
+				"message": "User not exists",
+			},
+		)
+	}
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&echo.Map{
+				"message": "There was an error with database",
+			},
+		)
+	}
+	totpInfo, err := user.GenerateTotpInfo()
+	log.Println(totpInfo)
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&echo.Map{
+				"message": "There was an error generating totp info",
+			},
+		)
+	}
+	// generated totp info
+	return c.JSON(
+		http.StatusOK,
+		&echo.Map{
+			"totp": totpInfo,
 		},
 	)
 }

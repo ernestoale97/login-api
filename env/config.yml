@@ -1,2 +1,2 @@
 APP_DATABASE: "file:test.db?cache=shared&mode=memory"
-APP_PORT: "7200"
+APP_PORT: "7100"

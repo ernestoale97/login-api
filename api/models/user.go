@@ -47,7 +47,7 @@ func (u *User) GenerateTotpInfo() (TotpInfo, error) {
 	if err != nil {
 		return TotpInfo{}, err
 	}
-	qr := "data:image/png;base64," + base64.StdEncoding.EncodeToString([]byte(png))
+	qr := base64.StdEncoding.EncodeToString([]byte(png))
 	return TotpInfo{
 		Secret: u.TotpSecret,
 		Uri:    uri,

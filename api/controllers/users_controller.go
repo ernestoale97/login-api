@@ -103,15 +103,8 @@ func ActivateTotp(c echo.Context) error {
 	}
 	// signup successful
 	return c.JSON(
-		http.StatusCreated,
-		&echo.Map{
-			"data": &echo.Map{
-				"user": &echo.Map{
-					"user_uuid": &user.UserUuid,
-					"email":     &user.Email,
-				},
-			},
-		},
+		http.StatusNoContent,
+		nil,
 	)
 }
 
@@ -187,9 +180,7 @@ func GenerateTotp(c echo.Context) error {
 	// generated totp info
 	return c.JSON(
 		http.StatusOK,
-		&echo.Map{
-			"totp": totpInfo,
-		},
+		totpInfo,
 	)
 }
 

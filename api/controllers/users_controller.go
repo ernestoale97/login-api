@@ -15,9 +15,9 @@ import (
 	"login_api/pkg/validation"
 	"login_api/storage"
 	"net/http"
+	"strconv"
 )
 
-// ActivateTotp headers: token of user; params:
 func ActivateTotp(c echo.Context) error {
 	// load config
 	_, err := config.LoadConfig()
@@ -30,7 +30,7 @@ func ActivateTotp(c echo.Context) error {
 			},
 		)
 	}
-	var data models.SignupInput
+	var data models.ActivateTotpInput
 	if err := c.Bind(&data); err != nil {
 		log.Println("Error on validating request data:", err.Error())
 		return c.JSON(
@@ -40,12 +40,18 @@ func ActivateTotp(c echo.Context) error {
 			},
 		)
 	}
+	// validate data input fields
 	validate := validation.GetInputValidationInstance()
 	if err := validate.Struct(data); err != nil {
+		return err
+	}
+	// validate token: scope, expiration, owner and signature
+	token, err := jwt_verifier.IsValidToken(c, "user")
+	if err != nil {
 		return c.JSON(
-			http.StatusBadRequest,
+			http.StatusUnauthorized,
 			&echo.Map{
-				"message": "There was an error in data input. Fix them",
+				"message": err.Error(),
 			},
 		)
 	}
@@ -53,55 +59,59 @@ func ActivateTotp(c echo.Context) error {
 	db, err := storage.ConnectDB()
 	if err != nil {
 		return c.JSON(
-			http.StatusInternalServerError,
+			http.StatusBadGateway,
 			&echo.Map{
 				"message": "There was an error with database",
+			},
+		)
+	}
+	// compare url user_uuid with token owner
+	var sub = token.Claims.(jwt.MapClaims)["sub"]
+	if sub != c.Param("uuid") {
+		return c.JSON(
+			http.StatusForbidden,
+			&echo.Map{
+				"message": "UUID does not match with token",
 			},
 		)
 	}
 	var user = models.User{}
-	err = db.Where("email = ?", data.Email).First(&user).Error
-	if err == nil {
+	err = db.Where("user_uuid = ?", sub).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.JSON(
-			http.StatusBadRequest,
+			http.StatusNotFound,
 			&echo.Map{
-				"message": "User email already exists",
+				"message": "User not exists",
 			},
 		)
 	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return c.JSON(
-			http.StatusInternalServerError,
+			http.StatusBadGateway,
 			&echo.Map{
 				"message": "There was an error with database",
 			},
 		)
 	}
-	hash, err := password_validator.HashPassword(data.Password)
-	if err != nil {
-		fmt.Println("Error creating password hash:", err.Error())
+	// now check received totp code against user secret
+	if !totp.Verify(user.TotpSecret, strconv.Itoa(data.Totp)) {
 		return c.JSON(
-			http.StatusBadGateway,
+			http.StatusUnauthorized,
 			&echo.Map{
-				"message": "There was an error creating the user",
+				"message": "Invalid totp",
 			},
 		)
 	}
-	user = models.User{
-		Email:      data.Email,
-		Password:   hash,
-		TotpActive: false,
-	}
-	result := db.Create(&user)
-	if result.Error != nil || result.RowsAffected <= 0 {
+	// code is valid so set 2fa activated successfully
+	res := db.Model(&user).Where("user_uuid = ?", sub).Update("totp_active", true)
+	if res.RowsAffected <= 0 {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error creating the user",
+				"message": "There was an error activating 2FA",
 			},
 		)
 	}
-	// signup successful
 	return c.JSON(
 		http.StatusNoContent,
 		nil,
@@ -168,7 +178,6 @@ func GenerateTotp(c echo.Context) error {
 		)
 	}
 	totpInfo, err := user.GenerateTotpInfo()
-	log.Println(totpInfo)
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,

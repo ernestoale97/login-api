@@ -8,10 +8,10 @@ import (
 	"log"
 	"login_api/api/models"
 	"login_api/pkg/config"
-	jwt_verifier "login_api/pkg/jwt"
+	jwtVerifier "login_api/pkg/jwt"
 	"login_api/pkg/password_validator"
 	"login_api/pkg/totp"
-	validation "login_api/pkg/validation"
+	"login_api/pkg/validation"
 	"login_api/storage"
 	"net/http"
 	"strconv"
@@ -25,17 +25,17 @@ func Login(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an unknown error",
+				"message": "Hubo un error desconocido",
 			},
 		)
 	}
 	var data models.LoginInput
 	if err := c.Bind(&data); err != nil {
-		log.Println("Error on validating request data:", err.Error())
+		log.Println("Error al validar los datos de entrada:", err.Error())
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"message": "There was an error validating your data. Please retry",
+				"message": "Error al validar los datos de entrada. Rectifíquelos",
 			},
 		)
 	}
@@ -49,7 +49,7 @@ func Login(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -57,17 +57,17 @@ func Login(c echo.Context) error {
 	err = db.Where("email = ?", data.Email).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.JSON(
-			http.StatusUnauthorized,
+			http.StatusNotFound,
 			&echo.Map{
-				"message": "User not exists",
+				"message": "El usuario no existe",
 			},
 		)
 	}
 	if err != nil {
 		return c.JSON(
-			http.StatusBadGateway,
+			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -75,7 +75,7 @@ func Login(c echo.Context) error {
 		return c.JSON(
 			http.StatusUnauthorized,
 			&echo.Map{
-				"message": "Wrong credentials",
+				"message": "Credenciales inválidas",
 			},
 		)
 	}
@@ -86,11 +86,10 @@ func Login(c echo.Context) error {
 			return c.JSON(
 				http.StatusBadGateway,
 				&echo.Map{
-					"message": "There was an error generating token for user",
+					"message": "Hubo un error al generar el token",
 				},
 			)
 		}
-		log.Println(jwtString)
 		return c.JSON(
 			http.StatusOK,
 			&echo.Map{
@@ -106,17 +105,17 @@ func Login(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error generating token for user",
+				"message": "Hubo un error al generar el token",
 			},
 		)
 	}
-	log.Println(jwtString)
 	// user logged in and totp not active
 	return c.JSON(
 		http.StatusOK,
 		&echo.Map{
 			"data": &echo.Map{
 				"access_token": jwtString,
+				"email":        user.Email,
 				"mfa_required": false,
 			},
 		},
@@ -131,17 +130,17 @@ func VerifyTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an unknown error",
+				"message": "Hubo un error desconocido",
 			},
 		)
 	}
 	var data models.VerifyTotpInput
 	if err := c.Bind(&data); err != nil {
-		log.Println("Error on validating request data:", err.Error())
+		log.Println("Error al validar los datos de entrada:", err.Error())
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"message": "There was an error validating your data. Please retry",
+				"message": "Error al validar los datos de entrada. Rectifíquelos",
 			},
 		)
 	}
@@ -155,12 +154,12 @@ func VerifyTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
 	// validate token
-	token, err := jwt_verifier.IsValidToken(c, "verify-totp")
+	token, err := jwtVerifier.IsValidToken(c, "verify-totp")
 	if err != nil {
 		return c.JSON(
 			http.StatusUnauthorized,
@@ -175,7 +174,7 @@ func VerifyTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -184,17 +183,17 @@ func VerifyTotp(c echo.Context) error {
 	err = db.Where("user_uuid = ?", sub).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.JSON(
-			http.StatusUnauthorized,
+			http.StatusNotFound,
 			&echo.Map{
-				"message": "User not exists",
+				"message": "El usuario no existe",
 			},
 		)
 	}
 	if err != nil {
 		return c.JSON(
-			http.StatusBadGateway,
+			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -202,7 +201,7 @@ func VerifyTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusForbidden,
 			&echo.Map{
-				"message": "User Totp is not active",
+				"message": "TOTP del usuario no activo",
 			},
 		)
 	}
@@ -211,7 +210,7 @@ func VerifyTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusUnauthorized,
 			&echo.Map{
-				"message": "Invalid totp",
+				"message": "TOTP inválido",
 			},
 		)
 	}
@@ -220,7 +219,7 @@ func VerifyTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error generating token for user",
+				"message": "Hubo un error al generar el token",
 			},
 		)
 	}
@@ -230,6 +229,7 @@ func VerifyTotp(c echo.Context) error {
 		&echo.Map{
 			"data": &echo.Map{
 				"access_token": jwtString,
+				"email":        user.Email,
 				"mfa_required": false,
 			},
 		},

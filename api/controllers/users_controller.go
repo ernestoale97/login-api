@@ -9,7 +9,7 @@ import (
 	"log"
 	"login_api/api/models"
 	"login_api/pkg/config"
-	jwt_verifier "login_api/pkg/jwt"
+	jwtVerifier "login_api/pkg/jwt"
 	"login_api/pkg/password_validator"
 	"login_api/pkg/totp"
 	"login_api/pkg/validation"
@@ -26,17 +26,17 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an unknown error",
+				"message": "Hubo un error desconocido",
 			},
 		)
 	}
 	var data models.ActivateTotpInput
 	if err := c.Bind(&data); err != nil {
-		log.Println("Error on validating request data:", err.Error())
+		log.Println("Error al validar los datos de entrada:", err.Error())
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"message": "There was an error validating your data. Please retry",
+				"message": "Error al validar los datos de entrada. Rectifíquelos",
 			},
 		)
 	}
@@ -46,7 +46,7 @@ func ActivateTotp(c echo.Context) error {
 		return err
 	}
 	// validate token: scope, expiration, owner and signature
-	token, err := jwt_verifier.IsValidToken(c, "user")
+	token, err := jwtVerifier.IsValidToken(c, "user")
 	if err != nil {
 		return c.JSON(
 			http.StatusUnauthorized,
@@ -61,7 +61,7 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -71,7 +71,7 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusForbidden,
 			&echo.Map{
-				"message": "UUID does not match with token",
+				"message": "UUID no coincide con el token",
 			},
 		)
 	}
@@ -81,15 +81,15 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusNotFound,
 			&echo.Map{
-				"message": "User not exists",
+				"message": "El usuario no existe",
 			},
 		)
 	}
 	if err != nil {
 		return c.JSON(
-			http.StatusBadGateway,
+			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -98,7 +98,7 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusUnauthorized,
 			&echo.Map{
-				"message": "Invalid totp",
+				"message": "TOTP inválido",
 			},
 		)
 	}
@@ -108,7 +108,7 @@ func ActivateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error activating 2FA",
+				"message": "Hubo un error activando el 2FA",
 			},
 		)
 	}
@@ -126,12 +126,12 @@ func GenerateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an unknown error",
+				"message": "Hubo un error desconocido",
 			},
 		)
 	}
 	// validate token
-	token, err := jwt_verifier.IsValidToken(c, "user")
+	token, err := jwtVerifier.IsValidToken(c, "user")
 	if err != nil {
 		return c.JSON(
 			http.StatusUnauthorized,
@@ -146,7 +146,7 @@ func GenerateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -155,7 +155,7 @@ func GenerateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusForbidden,
 			&echo.Map{
-				"message": "UUID not match with token",
+				"message": "UUID no coincide con el token",
 			},
 		)
 	}
@@ -165,7 +165,7 @@ func GenerateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "User not exists",
+				"message": "El usuario no existe",
 			},
 		)
 	}
@@ -173,7 +173,7 @@ func GenerateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -182,7 +182,7 @@ func GenerateTotp(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error generating totp info",
+				"message": "Hubo un error al generar la información del TOTP",
 			},
 		)
 	}
@@ -201,17 +201,17 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an unknown error",
+				"message": "Hubo un error desconocido",
 			},
 		)
 	}
 	var data models.SignupInput
 	if err := c.Bind(&data); err != nil {
-		log.Println("Error on validating request data:", err.Error())
+		log.Println("Error al validar los datos de entrada:", err.Error())
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"message": "There was an error validating your data. Please retry",
+				"message": "Error al validar los datos de entrada. Rectifíquelos",
 			},
 		)
 	}
@@ -220,7 +220,7 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"message": "There was an error in data input. Fix them",
+				"message": "Error al validar los datos de entrada. Rectifíquelos",
 			},
 		)
 	}
@@ -230,7 +230,7 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -240,7 +240,7 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadRequest,
 			&echo.Map{
-				"message": "User email already exists",
+				"message": "El correo ya existe",
 			},
 		)
 	}
@@ -248,7 +248,7 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&echo.Map{
-				"message": "There was an error with database",
+				"message": "Hubo un error con la base de datos",
 			},
 		)
 	}
@@ -258,7 +258,7 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error creating the user",
+				"message": "Hubo un error al crear el usuario",
 			},
 		)
 	}
@@ -273,7 +273,7 @@ func Signup(c echo.Context) error {
 		return c.JSON(
 			http.StatusBadGateway,
 			&echo.Map{
-				"message": "There was an error creating the user",
+				"message": "Hubo un error al crear el usuario",
 			},
 		)
 	}

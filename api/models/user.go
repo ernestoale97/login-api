@@ -31,7 +31,7 @@ type TotpInfo struct {
 	Secret string `json:"secret"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 	u.UserUuid = uuid.New().String()
 	return
 }

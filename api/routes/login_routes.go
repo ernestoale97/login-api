@@ -7,8 +7,7 @@ import (
 
 func LoginRoutes(app *echo.Echo) {
 	app.POST("/login", controllers.Login)
+	app.POST("/logout", controllers.Logout)
 	app.POST("/signup", controllers.Signup)
-
-	// verify totp using a verifyTotp scoped token
 	app.POST("/verify-totp", controllers.VerifyTotp)
 }

@@ -11,4 +11,6 @@ func UsersRoutes(app *echo.Echo) {
 	app.GET("/users/:uuid/totp", controllers.GenerateTotp)
 	// activates totp
 	app.POST("/users/:uuid/totp", controllers.ActivateTotp)
+	// disables totp
+	app.DELETE("/users/:uuid/totp", controllers.DisableTotp)
 }

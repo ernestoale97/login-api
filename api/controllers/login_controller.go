@@ -122,6 +122,11 @@ func Login(c echo.Context) error {
 	)
 }
 
+func Logout(c echo.Context) error {
+	// TODO logout, token revocation using REDIS
+	return nil
+}
+
 func VerifyTotp(c echo.Context) error {
 	// load config
 	_, err := config.LoadConfig()

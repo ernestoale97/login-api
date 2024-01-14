@@ -1,4 +1,5 @@
 version: '3.9'
+name: news
 services:
   login_api:
     container_name: news_login_api

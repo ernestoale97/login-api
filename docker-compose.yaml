@@ -1,4 +1,5 @@
 version: '3.9'
+name: login_news
 services:
   login_api:
     container_name: news_login_api
@@ -9,3 +10,14 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - ./env/:/app/env:Z
+  login-redis:
+    container_name: news_login_redis
+    image: redis:7.2.3-alpine3.19
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - login_redis_data:/data
+volumes:
+  login_redis_data:
+    driver: local

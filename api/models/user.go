@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
 	"github.com/xlzd/gotp"
@@ -77,33 +78,44 @@ func (u *User) GenerateJWT(scopeTotp bool) (string, error) {
 	}
 	builder := jwt.Signed(rsaSigner)
 	now := time.Now().UTC()
-	expireAt := time.Now().Add(time.Hour).UTC()
-	scopes := map[string]interface{}{
-		"sub":         u.UserUuid,
-		"scope":       "user",
-		"email":       u.Email,
-		"totp_active": u.TotpActive,
+	tokenBasic := Token{
+		Typ: "bearer",
+		Iat: now.Unix(),
+		Nbf: now.Unix(),
+		Iss: "login-news-api",
 	}
+	var tokenModel interface{}
+	accessUuid := uuid.New().String()
 	if scopeTotp {
-		scopes = map[string]interface{}{
-			"scope": "verify-totp",
+		tokenBasic.Scope = "verify-totp"
+		tokenBasic.Exp = time.Now().Add(time.Minute * 5).UTC().Unix()
+		tokenModel = tokenBasic
+	} else {
+		tokenBasic.Scope = "user"
+		tokenBasic.Exp = time.Now().Add(time.Hour).UTC().Unix()
+		tokenModel = UserToken{
+			Token:      tokenBasic,
+			Sub:        u.UserUuid,
+			AccessUuid: accessUuid,
+			Email:      u.Email,
+			TotpActive: u.TotpActive,
 		}
-		expireAt = time.Now().Add(time.Minute * 5).UTC()
 	}
-	claims := map[string]interface{}{
-		"typ": "bearer",
-		"iat": now.Unix(),
-		"nbf": now.Unix(),
-		"iss": "login-news-api",
-		"exp": expireAt.Unix(),
-		"sub": u.UserUuid,
-	}
-	builder = builder.Claims(claims).Claims(scopes)
+	builder = builder.Claims(tokenModel)
 	// validate all ok, sign with the RSA key, and return a compact JWT
 	jwtString, err := builder.CompactSerialize()
 	if err != nil {
 		log.Printf("failed to create JWT:%+v", err)
 		return "", err
+	}
+	i := fmt.Sprintf("%T", tokenModel)
+	if i == "models.UserToken" {
+		token := tokenModel.(UserToken)
+		// register user session in redis
+		err := token.CreateAuth()
+		if err != nil {
+			return "", err
+		}
 	}
 	log.Printf("Token generated succesfully %+v", jwtString)
 	return jwtString, nil

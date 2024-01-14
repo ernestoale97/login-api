@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"log"
+	"login_api/storage"
 	"os"
 	"strings"
 )
@@ -63,6 +64,18 @@ func parseValidateAndGetToken(bToken string) (*jwt.Token, error) {
 	return token, nil
 }
 
+func checkAccessUuid(accessUuid string) error {
+	client, err := storage.GetRedis()
+	if err != nil {
+		return err
+	}
+	_, err = client.Get(accessUuid).Result()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func IsValidToken(c echo.Context, scope string) (*jwt.Token, error) {
 	tokenHeader := c.Request().Header.Get("authorization")
 	// parse and validate token and receive an jwt.Token object
@@ -73,6 +86,10 @@ func IsValidToken(c echo.Context, scope string) (*jwt.Token, error) {
 	// if token is valid return no error
 	if token.Valid {
 		claims := token.Claims.(jwt.MapClaims)
+		err := checkAccessUuid(claims["access_uuid"].(string))
+		if err != nil {
+			return nil, errors.New("token is no longer valid")
+		}
 		if claims["scope"] != scope {
 			return nil, errors.New("not valid scope")
 		}

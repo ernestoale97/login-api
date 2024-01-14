@@ -7,7 +7,7 @@ import (
 
 func LoginRoutes(app *echo.Echo) {
 	app.POST("/login", controllers.Login)
-	app.POST("/logout", controllers.Logout)
+	app.GET("/logout", controllers.Logout)
 	app.POST("/signup", controllers.Signup)
 	app.POST("/verify-totp", controllers.VerifyTotp)
 }

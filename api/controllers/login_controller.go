@@ -123,8 +123,47 @@ func Login(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
-	// TODO logout, token revocation using REDIS
-	return nil
+	// validate token
+	token, err := jwtVerifier.IsValidToken(c, "user")
+	if err != nil {
+		return c.JSON(
+			http.StatusUnauthorized,
+			&echo.Map{
+				"message": err.Error(),
+			},
+		)
+	}
+	accessUuid := token.Claims.(jwt.MapClaims)["access_uuid"]
+	if accessUuid == nil || accessUuid == "" {
+		return c.JSON(
+			http.StatusUnauthorized,
+			&echo.Map{
+				"message": "Hubo un error al cerrar sesión",
+			},
+		)
+	}
+	client, err := storage.GetRedis()
+	if err != nil {
+		return c.JSON(
+			http.StatusUnprocessableEntity,
+			&echo.Map{
+				"message": "Hubo un error al cerrar sesión",
+			},
+		)
+	}
+	_, err = client.Del(accessUuid.(string)).Result()
+	if err != nil {
+		return c.JSON(
+			http.StatusUnprocessableEntity,
+			&echo.Map{
+				"message": "Hubo un error al cerrar sesión",
+			},
+		)
+	}
+	return c.JSON(
+		http.StatusNoContent,
+		nil,
+	)
 }
 
 func VerifyTotp(c echo.Context) error {

@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	AppDatabase string `mapstructure:"APP_DATABASE"`
+	AppRedis    string `mapstructure:"APP_REDIS"`
 	AppPort     string `mapstructure:"APP_PORT"`
 }
 

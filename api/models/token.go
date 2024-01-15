@@ -7,7 +7,6 @@ import (
 
 type UserToken struct {
 	Token
-	Sub        string `json:"sub"`
 	AccessUuid string `json:"access_uuid"`
 	Email      string `json:"email"`
 	TotpActive bool   `json:"totp_active"`
@@ -20,6 +19,7 @@ type Token struct {
 	Iss   string `json:"iss"`
 	Exp   int64  `json:"exp"`
 	Scope string `json:"scope"`
+	Sub   string `json:"sub"`
 }
 
 func (u *UserToken) CreateAuth() error {

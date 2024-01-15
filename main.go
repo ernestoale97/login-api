@@ -23,7 +23,7 @@ func main() {
 	// Adding logger
 	app.Use(middlewares.LogRequest)
 	// Adding panic recover
-	app.Use(middleware.Recover())
+	//app.Use(middleware.Recover())
 	// Routes
 	routes.LoginRoutes(app)
 	routes.UsersRoutes(app)

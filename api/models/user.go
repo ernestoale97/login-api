@@ -83,6 +83,7 @@ func (u *User) GenerateJWT(scopeTotp bool) (string, error) {
 		Iat: now.Unix(),
 		Nbf: now.Unix(),
 		Iss: "login-news-api",
+		Sub: u.UserUuid,
 	}
 	var tokenModel interface{}
 	accessUuid := uuid.New().String()
@@ -95,7 +96,6 @@ func (u *User) GenerateJWT(scopeTotp bool) (string, error) {
 		tokenBasic.Exp = time.Now().Add(time.Hour).UTC().Unix()
 		tokenModel = UserToken{
 			Token:      tokenBasic,
-			Sub:        u.UserUuid,
 			AccessUuid: accessUuid,
 			Email:      u.Email,
 			TotpActive: u.TotpActive,

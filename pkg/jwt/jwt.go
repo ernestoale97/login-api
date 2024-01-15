@@ -86,9 +86,11 @@ func IsValidToken(c echo.Context, scope string) (*jwt.Token, error) {
 	// if token is valid return no error
 	if token.Valid {
 		claims := token.Claims.(jwt.MapClaims)
-		err := checkAccessUuid(claims["access_uuid"].(string))
-		if err != nil {
-			return nil, errors.New("token is no longer valid")
+		if scope == "user" {
+			err := checkAccessUuid(claims["access_uuid"].(string))
+			if err != nil {
+				return nil, errors.New("token is no longer valid")
+			}
 		}
 		if claims["scope"] != scope {
 			return nil, errors.New("not valid scope")

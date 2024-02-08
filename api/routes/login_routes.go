@@ -10,4 +10,14 @@ func LoginRoutes(app *echo.Echo) {
 	app.GET("/logout", controllers.Logout)
 	app.POST("/signup", controllers.Signup)
 	app.POST("/verify-totp", controllers.VerifyTotp)
+
+	// testing
+	app.GET("/locales", controllers.GetLocales)
+	app.GET("/register-config", controllers.GetConfig)
+	app.POST("/register", controllers.Register)
+	app.POST("/login", controllers.AppLogin)
+	app.POST("/auth/userinfo", controllers.UserInfo)
+	app.POST("/auth/getListChallenge", controllers.ChallengesList)
+	app.POST("/auth/getMetricDetails", controllers.ChallengeMetrics)
+
 }

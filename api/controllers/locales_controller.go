@@ -27,6 +27,18 @@ func GetLocales(c echo.Context) error {
 	)
 }
 
+func GeneralConfig(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		echo.Map{
+			"company_name":       "Consummate Traders",
+			"company_short_name": "CT Traders",
+			"logo":               "https://appmobile.mmtech-solutions.com/storage/generalconfig/app_logo1689313183.png",
+			"small_logo":         "https://appmobile.mmtech-solutions.com/storage/generalconfig/small_app_logo1690844352.png",
+		},
+	)
+}
+
 func GetConfig(c echo.Context) error {
 	return c.JSON(
 		http.StatusOK,
@@ -83,18 +95,36 @@ func UserInfo(c echo.Context) error {
 		&echo.Map{
 			"code": "Ok",
 			"data": &echo.Map{
-				"id":                     127299,
-				"name":                   "Ernesto",
-				"lastname":               "Quintero Suarez",
-				"fullname":               "Ernesto Quintero Suarez",
-				"pic":                    "https://appmobile.mmtech-solutions.com/storage/ernestoale97_1706911950.jpg",
-				"deposit":                1160,
-				"withdraw":               -1256,
-				"profit":                 96,
-				"profitPositive":         1,
-				"balance":                849,
-				"mainAccount":            1263542,
-				"imgCurrencyMainAccount": "https://appmobile.mmtech-solutions.com/storage/cryptocurrency/65c283f9dce15_.jpg",
+				"id":                         127299,
+				"name":                       "Ernesto",
+				"lastname":                   "Quintero Suarez",
+				"fullname":                   "Ernesto Quintero Suarez",
+				"email":                      "ernestoale97@gmail.com",
+				"phone":                      "7252649699",
+				"sex":                        nil,
+				"birth":                      nil,
+				"country_id":                 240,
+				"city":                       nil,
+				"street":                     nil,
+				"postalcode":                 nil,
+				"instagram":                  nil,
+				"lang_id":                    nil,
+				"token_enable":               nil,
+				"security_type_verification": 0,
+				"pic":                        "https://appmobile.mmtech-solutions.com/storage/ernestoale97_1706911950.jpg",
+				"theme":                      0,
+				"lastlogin":                  "2024-02-22T19:27:17.000000Z",
+				"created_at":                 "2023-07-28T23:13:51.000000Z",
+				"ibusername":                 "Yakstest",
+				"ib_fn_program":              nil,
+				"verification_level":         "verified",
+				"deposit":                    1160,
+				"withdraw":                   -1256,
+				"profit":                     96,
+				"profitPositive":             1,
+				"balance":                    849,
+				"mainAccount":                1263542,
+				"imgCurrencyMainAccount":     "https://appmobile.mmtech-solutions.com/storage/cryptocurrency/65c283f9dce15_.jpg",
 				"lastTransactions": []echo.Map{
 					{
 						"description": "Deposit from back office",
@@ -5382,6 +5412,89 @@ func ChallengeMetrics(c echo.Context) error {
 					"funded":       1,
 				},
 			},
+		},
+	)
+}
+
+func Generate2faToken(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		&echo.Map{
+			"code": "Ok",
+			"data": &echo.Map{
+				"code": "2JRZWKRPN6BQL7OW",
+				"url":  "otpauth://totp/Consummate%20Traders:ernestoale97%40gmail.com?secret=2JRZWKRPN6BQL7OW&issuer=Consummate%20Traders&algorithm=SHA1&digits=6&period=30",
+			},
+		},
+	)
+}
+
+func Verify2faToken(c echo.Context) error {
+	err := false
+	if err {
+		return c.JSON(
+			http.StatusOK,
+			&echo.Map{
+				"code": "Error",
+				"data": &echo.Map{
+					"message": &echo.Map{
+						"code": []string{
+							"The field must be at least 6 characters",
+						},
+					},
+				},
+			},
+		)
+	}
+	return c.JSON(
+		http.StatusOK,
+		&echo.Map{
+			"code": "Ok",
+			"data": &echo.Map{
+				"code": "2JRZWKRPN6BQL7OW",
+				"url":  "otpauth://totp/Consummate%20Traders:ernestoale97%40gmail.com?secret=2JRZWKRPN6BQL7OW&issuer=Consummate%20Traders&algorithm=SHA1&digits=6&period=30",
+			},
+		},
+	)
+}
+
+func Disable2faToken(c echo.Context) error {
+	err := false
+	if err {
+		return c.JSON(
+			http.StatusOK,
+			&echo.Map{
+				"code": "Error",
+				"message": echo.Map{
+					"currentPassword": []string{
+						"Wrong password",
+					},
+				},
+			},
+		)
+	}
+	return c.JSON(
+		http.StatusOK,
+		&echo.Map{
+			"code": "Ok",
+		},
+	)
+}
+
+func EnableEmailVerification(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		&echo.Map{
+			"code": "Ok",
+		},
+	)
+}
+
+func DisableEmailVerification(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		&echo.Map{
+			"code": "Ok",
 		},
 	)
 }

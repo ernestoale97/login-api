@@ -14,12 +14,18 @@ func LoginRoutes(app *echo.Echo) {
 	// testing
 	app.GET("/locales", controllers.GetLocales)
 	app.GET("/register-config", controllers.GetConfig)
+	app.GET("/generalConfig", controllers.GeneralConfig)
 	app.POST("/register", controllers.Register)
 	app.POST("/login", controllers.AppLogin)
 	app.POST("/auth/userinfo", controllers.UserInfo)
 	app.GET("/auth/listActiveWallet", controllers.ActiveWallets)
-	app.GET("/auth/transactionHistoryByWallet", controllers.TransactionHistoryByWallet)
+	app.POST("/auth/transactionHistoryByWallet", controllers.TransactionHistoryByWallet)
 	app.GET("/auth/getListChallenge", controllers.ChallengesList)
 	app.POST("/auth/getMetricDetails", controllers.ChallengeMetrics)
+	app.POST("/auth/generate2FAToken", controllers.Generate2faToken)
+	app.POST("/auth/verify2FACode", controllers.Verify2faToken)
+	app.POST("/auth/disable2FA", controllers.Disable2faToken)
+	app.POST("/auth/enableEmailVerification", controllers.EnableEmailVerification)
+	app.POST("/auth/disableEmailVerification", controllers.DisableEmailVerification)
 
 }

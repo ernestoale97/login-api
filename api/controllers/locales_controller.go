@@ -118,39 +118,39 @@ func UserInfo(c echo.Context) error {
 				"ibusername":                 "Yakstest",
 				"ib_fn_program":              nil,
 				"verification_level":         "verified",
-				"deposit":                    1160,
-				"withdraw":                   -1256,
-				"profit":                     96,
+				"deposit":                    1160.87,
+				"withdraw":                   -1256.98,
+				"profit":                     96.43,
 				"profitPositive":             1,
-				"balance":                    849,
+				"balance":                    1212.22,
 				"mainAccount":                1263542,
 				"imgCurrencyMainAccount":     "https://appmobile.mmtech-solutions.com/storage/cryptocurrency/65c283f9dce15_.jpg",
 				"lastTransactions": []echo.Map{
 					{
 						"description": "Deposit from back office",
 						"move":        "Credit",
-						"amount":      1000,
+						"amount":      1000.12,
 						"date":        "29-07-2023 07:18:23",
 						"upToDown":    false,
 					},
 					{
 						"description": "Challenge Purchased: 64c4bd5d2699b",
 						"move":        "Debit",
-						"amount":      -49,
+						"amount":      -49.22,
 						"date":        "29-07-2023 07:18:53",
 						"upToDown":    true,
 					},
 					{
 						"description": "Challenge Purchased: 64c6b32f2fee1",
 						"move":        "Debit",
-						"amount":      -229,
+						"amount":      -229.24,
 						"date":        "30-07-2023 18:59:59",
 						"upToDown":    true,
 					},
 					{
 						"description": "Profit from MT account (2100249478)",
 						"move":        "Reward",
-						"amount":      140,
+						"amount":      140.15,
 						"date":        "31-07-2023 11:03:58",
 						"upToDown":    false,
 					},
@@ -5495,6 +5495,164 @@ func DisableEmailVerification(c echo.Context) error {
 		http.StatusOK,
 		&echo.Map{
 			"code": "Ok",
+		},
+	)
+}
+
+func GetBanner(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		[]echo.Map{
+			{
+				"file":  "https://appmobile.mmtech-solutions.com/65955d27ceb1d_.jpg",
+				"order": 1,
+			},
+			{
+				"file":  "https://appmobile.mmtech-solutions.com/65957675d63db_.jpg",
+				"order": 2,
+			},
+		},
+	)
+}
+
+func GetModules(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		[]echo.Map{
+			{
+				"id":               1,
+				"name":             "helpdesk_module",
+				"description":      "Helpdesk",
+				"config_section":   1,
+				"view":             "helpdesk",
+				"status":           1,
+				"parent_module_id": nil,
+				"created_at":       "2023-06-13T06:13:25.000000Z",
+				"updated_at":       "2023-06-13T14:22:58.000000Z",
+			},
+			{
+				"id":               2,
+				"name":             "kyc_module",
+				"description":      "Kyc",
+				"config_section":   0,
+				"view":             nil,
+				"status":           1,
+				"parent_module_id": nil,
+				"created_at":       "2023-06-13T06:13:25.000000Z",
+				"updated_at":       "2023-06-13T06:13:25.000000Z",
+			},
+			{
+				"id":               9,
+				"name":             "custom_deposit_module",
+				"description":      "Custom Deposit",
+				"config_section":   0,
+				"view":             nil,
+				"status":           1,
+				"parent_module_id": nil,
+				"created_at":       "2023-06-13T06:13:25.000000Z",
+				"updated_at":       "2023-07-20T14:48:49.000000Z",
+			},
+			{
+				"id":               10,
+				"name":             "funding_module",
+				"description":      "Funding",
+				"config_section":   0,
+				"view":             nil,
+				"status":           1,
+				"parent_module_id": nil,
+				"created_at":       "2023-06-24T10:56:18.000000Z",
+				"updated_at":       "2023-07-04T20:03:09.000000Z",
+			},
+		},
+	)
+}
+
+func UpdateImageProfile(c echo.Context) error {
+	// param imgprofile   and multipart form data
+	return c.JSON(
+		http.StatusOK,
+		echo.Map{
+			"code": "Ok",
+			"data": echo.Map{
+				"img": "https://appmobile.mmtech-solutions.com/storage/ernestoale97_1709001736.jpg",
+			},
+		},
+	)
+}
+
+func LoadAlerts(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		/*
+			{
+			    "main": [
+			        {
+			            "id": 19,
+			            "title": "Verify your identity and enjoy unlimited access.",
+			            "info": "To get started with the KYC process, please go to your Profile->KYC and submit all documents.",
+			            "bgcolor": "info",
+			            "textcolor": "text-dark",
+			            "showmain": 1,
+			            "popup": 0,
+			            "state": 1,
+			            "user_id": null,
+			            "created_at": "2023-05-03T17:43:19.000000Z",
+			            "updated_at": "2024-01-17T19:07:15.000000Z"
+			        },
+			        {
+			            "id": 23,
+			            "title": "Recent Update in our Email Server!",
+			            "info": "We are committed to keeping you informed and connected. In order to dont miss any of our transactional email as well as important notifications, We kindly ask you to check always your SPAM folder.\n\n\n",
+			            "bgcolor": "warning",
+			            "textcolor": "text-dark",
+			            "showmain": 1,
+			            "popup": 1,
+			            "state": 1,
+			            "user_id": null,
+			            "created_at": "2024-02-06T21:40:23.000000Z",
+			            "updated_at": "2024-02-07T11:53:16.000000Z"
+			        }
+			    ],
+			    "popup": [
+			        {
+			            "id": 20,
+			            "title": "Trade as a Pro on MT5!",
+			            "info": "Join our community of Pro Traders MT5 and receive a generous welcome bonus worth up to $200. ",
+			            "bgcolor": "info",
+			            "textcolor": "text-dark",
+			            "showmain": 0,
+			            "popup": 1,
+			            "state": 1,
+			            "user_id": null,
+			            "created_at": "2023-05-04T21:46:44.000000Z",
+			            "updated_at": "2024-01-19T08:31:51.000000Z"
+			        },
+			        {
+			            "id": 23,
+			            "title": "Recent Update in our Email Server!",
+			            "info": "We are committed to keeping you informed and connected. In order to dont miss any of our transactional email as well as important notifications, We kindly ask you to check always your SPAM folder.\n\n\n",
+			            "bgcolor": "warning",
+			            "textcolor": "text-dark",
+			            "showmain": 1,
+			            "popup": 1,
+			            "state": 1,
+			            "user_id": null,
+			            "created_at": "2024-02-06T21:40:23.000000Z",
+			            "updated_at": "2024-02-07T11:53:16.000000Z"
+			        }
+			    ],
+			    "personal": []
+			}
+		*/
+		[]echo.Map{
+			{
+				"file":  "https://appmobile.mmtech-solutions.com/65955d27ceb1d_.jpg",
+				"order": 1,
+			},
+			{
+				"file":  "https://appmobile.mmtech-solutions.com/65957675d63db_.jpg",
+				"order": 2,
+			},
 		},
 	)
 }

@@ -22,10 +22,14 @@ func LoginRoutes(app *echo.Echo) {
 	app.POST("/auth/transactionHistoryByWallet", controllers.TransactionHistoryByWallet)
 	app.GET("/auth/getListChallenge", controllers.ChallengesList)
 	app.POST("/auth/getMetricDetails", controllers.ChallengeMetrics)
-	app.POST("/auth/generate2FAToken", controllers.Generate2faToken)
+	app.GET("/auth/generate2FAToken", controllers.Generate2faToken)
 	app.POST("/auth/verify2FACode", controllers.Verify2faToken)
 	app.POST("/auth/disable2FA", controllers.Disable2faToken)
-	app.POST("/auth/enableEmailVerification", controllers.EnableEmailVerification)
-	app.POST("/auth/disableEmailVerification", controllers.DisableEmailVerification)
+	app.GET("/auth/enableEmailVerification", controllers.EnableEmailVerification)
+	app.GET("/auth/disableEmailVerification", controllers.DisableEmailVerification)
+	app.GET("/auth/getBanner", controllers.GetBanner)
+	app.GET("/auth/loadAlerts", controllers.LoadAlerts)
+	app.GET("/auth/getModules", controllers.GetModules)
+	app.POST("/auth/updatedImgprofile", controllers.UpdateImageProfile)
 
 }
